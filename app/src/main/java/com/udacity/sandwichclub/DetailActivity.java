@@ -3,17 +3,23 @@ package com.udacity.sandwichclub;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.udacity.sandwichclub.model.Sandwich;
 import com.udacity.sandwichclub.utils.JsonUtils;
 
+import java.util.List;
+
 public class DetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
+    public static final String SEPARATOR = ", ";
+    private static final String UNKNOWN = "Unknown";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +49,7 @@ public class DetailActivity extends AppCompatActivity {
             return;
         }
 
-        populateUI();
+        populateUI(sandwich);
         Picasso.with(this)
                 .load(sandwich.getImage())
                 .into(ingredientsIv);
@@ -56,7 +62,44 @@ public class DetailActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
     }
 
-    private void populateUI() {
+    private void populateUI(Sandwich sandwich) {
+        TextView mainNameTv = findViewById(R.id.main_name_tv);
+        TextView descriptionTv = findViewById(R.id.description_tv);
+        TextView originTv = findViewById(R.id.origin_tv);
+        TextView ingredientsTv = findViewById(R.id.ingredients_tv);
 
+        mainNameTv.setText(sandwich.getMainName());
+        descriptionTv.setText(sandwich.getDescription());
+        originTv.setText(!sandwich.getPlaceOfOrigin().isEmpty() ? sandwich.getPlaceOfOrigin() : UNKNOWN);
+
+        List<String> knownAsList = sandwich.getAlsoKnownAs();
+        addKnownNames(knownAsList);
+
+        StringBuilder ingredients = new StringBuilder();
+        for (String ingredient : sandwich.getIngredients()) {
+            ingredients.append(ingredient + "\n");
+        }
+
+        ingredientsTv.setText(ingredients.toString());
+    }
+
+    private void addKnownNames(List<String> knownAsList) {
+        TextView alsoKnownAsLabelTv = findViewById(R.id.alsoKnownAs_label_tv);
+        TextView alsoKnownAsTv = findViewById(R.id.also_known_tv);
+        StringBuilder alsoKnownBuilder = new StringBuilder();
+        if (knownAsList.isEmpty()) {
+            alsoKnownAsLabelTv.setVisibility(View.GONE);
+            alsoKnownAsTv.setVisibility(View.GONE);
+            return;
+        }
+
+        for (String knownName : knownAsList) {
+            alsoKnownBuilder.append(knownName);
+            if (!knownAsList.get(knownAsList.size() - 1).equals(knownName)) {
+                alsoKnownBuilder.append(SEPARATOR);
+            }
+        }
+
+        alsoKnownAsTv.setText(alsoKnownBuilder.toString());
     }
 }
